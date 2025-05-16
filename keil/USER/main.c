@@ -1,8 +1,6 @@
-#include "led.h"
 #include "delay.h"
 #include "sys.h"
 #include "usart.h"
-#include "lcd.h"
 #include "adc.h"
 #include "dma.h"
 #include <stdarg.h>
@@ -12,33 +10,33 @@
 
 //void Show_other(void);
 //void ShowCH_Voltage(void);
-// ·¢ËsÍ×Ö·?´®
+// å‘è—„å¦¥å€?ä¸²
 char uart2_send_str[100]; 
 char uart3_send_str[100]; 
 extern uint8_t g_usart_rx_buf[USART_REC_LEN];
 uint8_t bussiness_flag = 0;
-/*  ½ÓÊÕ×´Ì¬
- *  bit15£¬      ½ÓÊÕÍê³É±êÖ¾
- *  bit14£¬      ½ÓÊÕµ½0x0d
- *  bit13~0£¬    ½ÓÊÕµ½µÄÓĞĞ§×Ö½ÚÊıÄ¿
+/*  æ¥æ”¶çŠ¶æ€
+ *  bit15ï¼Œ      æ¥æ”¶å®Œæˆæ ‡å¿—
+ *  bit14ï¼Œ      æ¥æ”¶åˆ°0x0d
+ *  bit13~0ï¼Œ    æ¥æ”¶åˆ°çš„æœ‰æ•ˆå­—èŠ‚æ•°ç›®
 */
 extern  uint16_t g_usart_rx_sta;
 extern uint16_t g_usart3_flag;
-// ·¢ËÍµ¥¸ö×Ö·û
+// å‘é€å•ä¸ªå­—ç¬¦
 void USART2_SendChar(char ch)
 {
-    // µÈ´ı·¢ËÍ»º³åÇøÎª¿Õ
+    // ç­‰å¾…å‘é€ç¼“å†²åŒºä¸ºç©º
     while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
-    // ½«Òª·¢ËÍµÄ×Ö·ûĞ´Èë·¢ËÍÊı¾İ¼Ä´æÆ÷
+    // å°†è¦å‘é€çš„å­—ç¬¦å†™å…¥å‘é€æ•°æ®å¯„å­˜å™¨
     USART_SendData(USART2, (uint8_t)ch);
 }
 
-// ·¢ËÍµ¥¸ö×Ö·û
+// å‘é€å•ä¸ªå­—ç¬¦
 void USART3_SendChar(char ch)
 {
-    // µÈ´ı·¢ËÍ»º³åÇøÎª¿Õ
+    // ç­‰å¾…å‘é€ç¼“å†²åŒºä¸ºç©º
     while (USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
-    // ½«Òª·¢ËÍµÄ×Ö·ûĞ´Èë·¢ËÍÊı¾İ¼Ä´æÆ÷
+    // å°†è¦å‘é€çš„å­—ç¬¦å†™å…¥å‘é€æ•°æ®å¯„å­˜å™¨
     USART_SendData(USART3, (uint8_t)ch);
 }
 
@@ -59,34 +57,34 @@ void USART3_SendString(char* str)
 }
 
 void esp8266_Config(void){
-    // 1. ¸´Î»Ä£¿é£¨ĞèµÈ´ıÖØÆôÍê³É£©
+    // 1. å¤ä½æ¨¡å—ï¼ˆéœ€ç­‰å¾…é‡å¯å®Œæˆï¼‰
     USART3_SendString("AT+RST\r\n");
-    delay_ms(1500); // ¸´Î»ºóµÈ´ı2Ãë£¨Ä£¿éÖØÆôÔ¼1~2Ãë£©
+    delay_ms(1500); // å¤ä½åç­‰å¾…2ç§’ï¼ˆæ¨¡å—é‡å¯çº¦1~2ç§’ï¼‰
     
-    // 2. ²âÊÔATÖ¸Áî£¨¿ìËÙÏìÓ¦£¬ÎŞĞè³¤ÑÓ³Ù£©
+    // 2. æµ‹è¯•ATæŒ‡ä»¤ï¼ˆå¿«é€Ÿå“åº”ï¼Œæ— éœ€é•¿å»¶è¿Ÿï¼‰
     USART3_SendString("AT\r\n");    
-    delay_ms(1500);  // ½öĞè500ms¼´¿É½ÓÊÕÏìÓ¦
+    delay_ms(1500);  // ä»…éœ€500mså³å¯æ¥æ”¶å“åº”
     
-    // 3. ¶Ï¿ªµ±Ç°WiFi£¨ÈôÎ´Á¬½Ó£¬¿ìËÙÏìÓ¦£©
+    // 3. æ–­å¼€å½“å‰WiFiï¼ˆè‹¥æœªè¿æ¥ï¼Œå¿«é€Ÿå“åº”ï¼‰
     USART3_SendString("AT+CWQAP\r\n");
     delay_ms(1500);
     
-    // 4. Á¬½ÓWiFi£¨ºÄÊ±×î³¤£¬Ğè×ã¹»ÑÓ³Ù»òÏìÓ¦¼ì²â£©
+    // 4. è¿æ¥WiFiï¼ˆè€—æ—¶æœ€é•¿ï¼Œéœ€è¶³å¤Ÿå»¶è¿Ÿæˆ–å“åº”æ£€æµ‹ï¼‰
     USART3_SendString("AT+CWJAP=\"oneplus\",\"hc123456\"\r\n");
-    delay_ms(1500); // ÑÓ³¤ÖÁ5Ãë£¬Ìá¸ß³É¹¦ÂÊ
+    delay_ms(1500); // å»¶é•¿è‡³5ç§’ï¼Œæé«˜æˆåŠŸç‡
     delay_ms(1500);
     delay_ms(1500);
     delay_ms(1500);
 	delay_ms(1500);
-    // 5. ÉèÖÃ¶àÁ¬½Ó£¨¿ìËÙÏìÓ¦£©
+    // 5. è®¾ç½®å¤šè¿æ¥ï¼ˆå¿«é€Ÿå“åº”ï¼‰
     USART3_SendString("AT+CIPMUX=1\r\n");    
     delay_ms(1500);
     delay_ms(1500);
-    // 6. »ñÈ¡IPµØÖ·£¨ĞèÈ·±£WiFiÒÑÁ¬½Ó£©
+    // 6. è·å–IPåœ°å€ï¼ˆéœ€ç¡®ä¿WiFiå·²è¿æ¥ï¼‰
     USART3_SendString("AT+CIFSR\r\n");    
-    delay_ms(1500); // ÏìÓ¦½Ï¿ì£¬¶ÌÑÓ³Ù¼´¿É
+    delay_ms(1500); // å“åº”è¾ƒå¿«ï¼ŒçŸ­å»¶è¿Ÿå³å¯
     delay_ms(1500);
-    // 7. ÉèÖÃ·şÎñÆ÷¶Ë¿Ú£¨ÀıÈçÉèÖÃÎª8080£©
+    // 7. è®¾ç½®æœåŠ¡å™¨ç«¯å£ï¼ˆä¾‹å¦‚è®¾ç½®ä¸º8080ï¼‰
     USART3_SendString("AT+CIPSERVER=1,3030\r\n");
     delay_ms(1500);
        
@@ -97,13 +95,11 @@ void esp8266_Config(void){
    
 int main(void)
  { 
-	delay_init();	    	 //ÑÓÊ±º¯Êı³õÊ¼»¯	  
-	uart_init(115200);	 	//´®¿Ú³õÊ¼»¯Îª9600
+	delay_init();	    	 //å»¶æ—¶å‡½æ•°åˆå§‹åŒ–	  
+	uart_init(115200);	 	//ä¸²å£åˆå§‹åŒ–ä¸º9600
 	uart2_init(115200);
 	uart3_init(115200);
-	LED_Init();		  		//³õÊ¼»¯ÓëLEDÁ¬½ÓµÄÓ²¼ş½Ó¿Ú
-	LCD_Init();			   	//³õÊ¼»¯LCD 
-	Adc_Init();		  		//ADC³õÊ¼»¯	  
+	Adc_Init();		  		//ADCåˆå§‹åŒ–	  
  	dma_Config(DMA1_Channel1,(u32)&ADC1->DR,(u32)&AD_Value,N*M);
 	printf("*****************system begin***************\r\n");
     esp8266_Config();
@@ -111,7 +107,7 @@ int main(void)
     while(1)
 	{
 
-		while((DMA_GetFlagStatus(DMA1_FLAG_TC1)) == RESET);//Ã¿´Î°áÔËÍê£¬ÔÙ´¦ÀíÊı×éµÃ³öµçÑ¹
+		while((DMA_GetFlagStatus(DMA1_FLAG_TC1)) == RESET);//æ¯æ¬¡æ¬è¿å®Œï¼Œå†å¤„ç†æ•°ç»„å¾—å‡ºç”µå‹
 		printf("%d#%d#%d#1000#\r\n",AD_Value[0][0],AD_Value[0][1],AD_Value[0][2]);
 		sprintf(uart2_send_str,"%d,%d,%d,",AD_Value[0][0],AD_Value[0][1],AD_Value[0][2]);
         sprintf(uart3_send_str,"%4d#%4d#%4d#1000",AD_Value[0][0],AD_Value[0][1],AD_Value[0][2]);
@@ -125,462 +121,3 @@ int main(void)
 
 	}
 }
-	
-//void ShowCH_Voltage(void)
-//{
-//	int i=0,j=0;
-//	float temp,SUM;
-//	for(j=0;j<M;j++)//M£¬Í¨µÀ¸öÊı
-//	 { 
-//		for(i=0;i<N;i++)//N£¬Ã¿¸öÍ¨µÀ²ÉÑù´ÎÊı
-//		 {
-//	      SUM+=AD_Value[i][j]; //Ã¿¸öÍ¨µÀµÄÊı¾İÇóºÍ£¬×¢ÒâÊÇ¶şÎ¬Êı×éµÄÃ¿ÁĞµÄÊı¾İÇóºÍ
-//		 }
-//		Average[j]=SUM/N; //ÔÙÈ¡Æ½¾ù
-//		temp=(float)Average[j]*(3.3/4096.0);
-//		Average[j]=temp;
-//		LCD_ShowxNum(144,40+30*j,Average[j],1,24,0);//ÏÔÊ¾µçÑ¹ÖµµÄÕûÊı²¿·Ö
-//		temp-=Average[j];
-//		temp*=10000;
-//		LCD_ShowxNum(144+24,40+30*j,temp,4,24,0X80);//ÏÔÊ¾µçÑ¹ÖµµÄĞ¡Êı²¿·Ö
-//		Average[j]=0;//¿ªÖÚÌáĞÑÖÃÁã
-//		SUM=0;//¿ªÖÚÌáĞÑÖÃÁã
-//	 } 
-//}
-
-//void Show_other(void)
-//{
-//	int j=0;
-//	u8 ADC_Ch[20];
-//	POINT_COLOR=MAGENTA;//ÉèÖÃ×ÖÌåÎª×ÏÉ« 
-//	LCD_ShowString(20,15,200,24,24,"8 Channel ADC+DMA");
-//	show_sentence24_24(20,275,200,24,24,"°ô°ô¹§Ï²³É¹¦");
-//	LCD_ShowString(120,295,200,24,24,"2020/12/4");	
-//	for(j=0;j<M;j++)
-//	{
-//		sprintf((char*)ADC_Ch,"ADC_CH%d_VOL:0.0000V",j);//½«int±äÁ¿j´òÓ¡µ½ADC_ChÊı×é¡£	
-//		LCD_ShowString(0,40+30*j,240,24,24,ADC_Ch);
-//	}
-//}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-////#include "led.h"
-////#include "delay.h"
-////#include "key.h"
-////#include "sys.h"
-////#include "lcd.h"
-////#include "usart.h"	 
-////#include "adc.h"
-////#include "stm32f10x.h" 
-////#include <stdio.h>
-////#define N 3//Ã¿Í¨µÀ²É10´Î
-////#define M 3 //Îª3¸öÍ¨µÀ
-////vu16 AD_Value[N][M]; //ÓÃÀ´´æ·ÅADC×ª»»½á¹û£¬Ò²ÊÇDMAµÄÄ¿±êµØÖ·
-////vu16 After_filter[M]; //ÓÃÀ´´æ·ÅÇóÆ½¾ùÖµÖ®ºóµÄ½á¹û
-
-
-//// void u32tostr1(unsigned long dat,char *str);
-//// void u32tostr2(unsigned long dat,char *str);
-//// void u32tostr3(unsigned long dat,char *str);
-//// void  filter(void);
-//// 
-//// 
-//// int main(void)
-//// {	 
-
-////	u16 value[M];  //M¸öÍ¨µÀ
-////	 char temp1[10];
-////	 char temp2[10];
-////	 char temp3[10];
-////	delay_init();	    	 //ÑÓÊ±º¯Êı³õÊ¼»¯	  
-////	uart_init(115200);	 	//´®¿Ú³õÊ¼»¯Îª115200
-//// 	LED_Init();			     //LED¶Ë¿Ú³õÊ¼»¯			 	
-//// 	Adc_Init();		  		//ADC³õÊ¼»¯
-
-////	//while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);  
-
-////	while(1)
-////	{
-////		//adcx=Get_Adc_Average(ADC_Channel_1,3);
-////	//	while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);
-////		//adcx=Get_Adc(ADC_Channel_1);
-//////	  u32tostr(adcx,temp);
-//////	 	printf("%s#",temp);
-////	//	printf("%d#",adcx);
-////		while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET); //µÈ´ı´«ÊäÍê³É·ñÔòµÚÒ»Î»Êı¾İÈİÒ×¶ªÊ§
-////	//	 filter();
-////	 
-//////       value[0]= AD_Value[0][0];  u32tostr1(value[0],temp1);  // 	printf("%s#",temp1);
-//////       value[1]= AD_Value[0][1];  u32tostr2(value[1],temp2);	//	printf("%s@",temp2);
-//////       value[2]= AD_Value[0][2];  u32tostr3(value[2],temp3);
-
-//////		    u32tostr1(AD_Value[0][0],temp1);  // 	printf("%s#",temp1);
-//////        u32tostr2(AD_Value[0][1],temp2);	//	printf("%s@",temp2);
-//////        u32tostr3(AD_Value[0][2],temp3);
-////		
-//////    	printf("%s#",temp1);
-//////			printf("%s#",temp2);
-//////	   	printf("%s#",temp3);
-//////			printf("1000#");
-//////		 printf("%s#%s#%s#1000#",temp1,temp2,temp3);
-////			printf("%d#%d#%d#1000#",AD_Value[0][0],AD_Value[0][1], AD_Value[0][2]);
-////			//delay_us(500);
-////		//delay_ms(5);
-//////for(i=0;i<3;i++)
-//////{
-//////value[i]= GetVolt(After_filter[i]);
-
-//////printf("value[%d]:\t%d.%dv\n",i,value[i]/100,value[i]) ;
-//////delay_ms(100);
-//////}
-//////}
-
-////		
-////		LED0=!LED0;
-////		
-////	}
-////}
-//// 
-////void  filter(void)
-////   {
-////      float sum = 0;
-////      u8 count;
-////		  int i;
-////    for(i=0;i<M;i++)  //¶ÔÃ¿Ò»¸öÍ¨µÀ¶øÑÔM
-
-////     {
-
-////      for ( count=0;count<N;count++)   //N²ÉÑù¶àÉÙ´Î£¬MÍ¨µÀÊı
-
-////      {
-
-////          sum += AD_Value[count][i];
-
-////        }
-
-////       After_filter[i]=sum/N;
-
-////      sum=0;
-////      }
-////      }
-////	 
-////			
-////void u32tostr1(unsigned long dat,char *str)
-//// {
-////	 char t1[20];
-////	 unsigned char i=0,j=0;
-////	 i=0;
-////	 while(dat)
-////	 {
-////		 t1[i]=dat%10+0x30;
-////		 i++;
-////		 dat/=10;
-////	 }
-////	 j=i;
-////	  for(i=0;i<j;i++)
-////    {
-////          str[i]=t1[j-i-1];
-////    }
-////    if(!i) {str[i++]='0';}
-////    str[i]=0;
-////	 
-//// }
-//// void u32tostr2(unsigned long dat,char *str)
-//// {
-////	 char t2[20];
-////	 unsigned char i=0,j=0;
-////	 i=0;
-////	 while(dat)
-////	 {
-////		 t2[i]=dat%10+0x30;
-////		 i++;
-////		 dat/=10;
-////	 }
-////	 j=i;
-////	  for(i=0;i<j;i++)
-////    {
-////          str[i]=t2[j-i-1];
-////    }
-////    if(!i) {str[i++]='0';}
-////    str[i]=0;
-////	 
-//// }
-//// void u32tostr3(unsigned long dat,char *str)
-//// {
-////	 char t3[20];
-////	 unsigned char i=0,j=0;
-////	 i=0;
-////	 while(dat)
-////	 {
-////		 t3[i]=dat%10+0x30;
-////		 i++;
-////		 dat/=10;
-////	 }
-////	 j=i;
-////	  for(i=0;i<j;i++)
-////    {
-////          str[i]=t3[j-i-1];
-////    }
-////    if(!i) {str[i++]='0';}
-////    str[i]=0;
-////	 
-//// }
-//// 
-//	V_TAO=(float)ADCConvertedValue*(3.3/4096)*1000;
-
-//#include "stm32f10x.h" //Õâ¸öÍ·ÎÄ¼ş°üÀ¨STM32F10xËùÓĞÍâÎ§¼Ä´æÆ÷¡¢Î»¡¢ÄÚ´æÓ³ÉäµÄ¶¨Òå
-////#include "eval.h" //Í·ÎÄ¼ş£¨°üÀ¨´®¿Ú¡¢°´¼ü¡¢LEDµÄº¯ÊıÉùÃ÷£©
-////#include "SysTickDelay.h"
-////#include "UART_INTERFACE.h"
-//#include <stdio.h>
-
-//#define N 50 //Ã¿Í¨µÀ²É50´Î
-//#define M 3 //Îª3¸öÍ¨µÀ
-
-//__IO uint16_t ADCConvertedValue;	//ADC DMA  buffer
-
-//vu16 AD_Value[N][M]; //ÓÃÀ´´æ·ÅADC×ª»»½á¹û£¬Ò²ÊÇDMAµÄÄ¿±êµØÖ·
-//vu16 After_filter[M]; //ÓÃÀ´´æ·ÅÇóÆ½¾ùÖµÖ®ºóµÄ½á¹û
-//int i;
-// 
-// void GPIO_Configuration(void)
-//{
-//GPIO_InitTypeDef GPIO_InitStructure;
-
-//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
-//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; //ÒòÎªUSART1¹Ü½ÅÊÇÒÔ¸´ÓÃµÄĞÎÊ½½Óµ½GPIO¿ÚÉÏµÄ£¬ËùÒÔÊ¹ÓÃ¸´ÓÃÍÆÍìÊ½Êä³ö
-//GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-//GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-
-//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-//GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-
-
-////PA0/1/2 ×÷ÎªÄ£ÄâÍ¨µÀÊäÈëÒı½Å
-//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0| GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3;
-//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; //Ä£ÄâÊäÈëÒı½Å
-//GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-////PB0/1 ×÷ÎªÄ£ÄâÍ¨µÀÊäÈëÒı½Å
-//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1;
-//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; //Ä£ÄâÊäÈëÒı½Å
-//GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-////PC0/1/2/3/4/5 ×÷ÎªÄ£ÄâÍ¨µÀÊäÈëÒı½Å
-//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5;
-//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; //Ä£ÄâÊäÈëÒı½Å
-//GPIO_Init(GPIOC, &GPIO_InitStructure);
-//}
-
-
-
-//void RCC_Configuration(void)
-//{
-//ErrorStatus HSEStartUpStatus;
-
-//RCC_DeInit(); //RCC ÏµÍ³¸´Î»
-//RCC_HSEConfig(RCC_HSE_ON); //¿ªÆôHSE
-//HSEStartUpStatus = RCC_WaitForHSEStartUp(); //µÈ´ıHSE×¼±¸ºÃ
-//if(HSEStartUpStatus == SUCCESS)
-//{
-//FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable); //Enable Prefetch Buffer
-//FLASH_SetLatency(FLASH_Latency_2); //Set 2 Latency cycles
-//RCC_HCLKConfig(RCC_SYSCLK_Div1); //AHB clock = SYSCLK
-//RCC_PCLK2Config(RCC_HCLK_Div1); //APB2 clock = HCLK
-//RCC_PCLK1Config(RCC_HCLK_Div2); //APB1 clock = HCLK/2
-//RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_6); //PLLCLK = 12MHz * 6 = 72 MHz
-//RCC_PLLCmd(ENABLE); //Enable PLL
-//while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET); //Wait till PLL is ready
-//RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK); //Select PLL as system clock source
-//while(RCC_GetSYSCLKSource() != 0x08); //Wait till PLL is used as system clock source
-
-//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB
-//| RCC_APB2Periph_GPIOC |RCC_APB2Periph_ADC1 | RCC_APB2Periph_AFIO |RCC_APB2Periph_USART1, ENABLE ); //Ê¹ÄÜADC1Í¨µÀÊ±ÖÓ£¬¸÷¸ö¹Ü½ÅÊ±ÖÓ
-
-//RCC_ADCCLKConfig(RCC_PCLK2_Div6); //72M/6=12,ADC×î´óÊ±¼ä²»ÄÜ³¬¹ı14M
-//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE); //Ê¹ÄÜDMA´«Êä
-
-//}
-//}
-
-
-//void ADC1_Configuration(void)
-//{
-//ADC_InitTypeDef ADC_InitStructure;
-
-//ADC_DeInit(ADC1); //½«ÍâÉè ADC1 µÄÈ«²¿¼Ä´æÆ÷ÖØÉèÎªÈ±Ê¡Öµ
-
-
-//ADC_InitStructure.ADC_Mode = ADC_Mode_Independent; //ADC¹¤×÷Ä£Ê½:ADC1ºÍADC2¹¤×÷ÔÚ¶ÀÁ¢Ä£Ê½
-//ADC_InitStructure.ADC_ScanConvMode =ENABLE; //Ä£Êı×ª»»¹¤×÷ÔÚÉ¨ÃèÄ£Ê½
-//ADC_InitStructure.ADC_ContinuousConvMode = ENABLE; //Ä£Êı×ª»»¹¤×÷ÔÚÁ¬Ğø×ª»»Ä£Ê½
-//ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None; //Íâ²¿´¥·¢×ª»»¹Ø±Õ
-//ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right; //ADCÊı¾İÓÒ¶ÔÆë
-//ADC_InitStructure.ADC_NbrOfChannel = M; //Ë³Ğò½øĞĞ¹æÔò×ª»»µÄADCÍ¨µÀµÄÊıÄ¿
-//ADC_Init(ADC1, &ADC_InitStructure); //¸ù¾İADC_InitStructÖĞÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯ÍâÉèADCxµÄ¼Ä´æÆ÷
-
-
-////ÉèÖÃÖ¸¶¨ADCµÄ¹æÔò×éÍ¨µÀ£¬ÉèÖÃËüÃÇµÄ×ª»¯Ë³ĞòºÍ²ÉÑùÊ±¼ä
-////ADC1,ADCÍ¨µÀx,¹æÔò²ÉÑùË³ĞòÖµÎªy,²ÉÑùÊ±¼äÎª239.5ÖÜÆÚ
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_239Cycles5 );
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 2, ADC_SampleTime_239Cycles5 );
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 3, ADC_SampleTime_239Cycles5 );
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 4, ADC_SampleTime_239Cycles5 );
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 5, ADC_SampleTime_239Cycles5 );
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_9, 6, ADC_SampleTime_239Cycles5 );
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 7, ADC_SampleTime_239Cycles5 );
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 8, ADC_SampleTime_239Cycles5 );
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_12, 9, ADC_SampleTime_239Cycles5 );
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 10, ADC_SampleTime_239Cycles5 );
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_14, 11, ADC_SampleTime_239Cycles5 );
-//ADC_RegularChannelConfig(ADC1, ADC_Channel_15, 12, ADC_SampleTime_239Cycles5 );
-
-//// ¿ªÆôADCµÄDMAÖ§³Ö£¨ÒªÊµÏÖDMA¹¦ÄÜ£¬»¹Ğè¶ÀÁ¢ÅäÖÃDMAÍ¨µÀµÈ²ÎÊı£©
-//ADC_DMACmd(ADC1, ENABLE);
-
-
-//ADC_Cmd(ADC1, ENABLE); //Ê¹ÄÜÖ¸¶¨µÄADC1
-
-//ADC_ResetCalibration(ADC1); //¸´Î»Ö¸¶¨µÄADC1µÄĞ£×¼¼Ä´æÆ÷
-
-//while(ADC_GetResetCalibrationStatus(ADC1)); //»ñÈ¡ADC1¸´Î»Ğ£×¼¼Ä´æÆ÷µÄ×´Ì¬,ÉèÖÃ×´Ì¬ÔòµÈ´ı
-
-
-//ADC_StartCalibration(ADC1); //¿ªÊ¼Ö¸¶¨ADC1µÄĞ£×¼×´Ì¬
-
-//while(ADC_GetCalibrationStatus(ADC1)); //»ñÈ¡Ö¸¶¨ADC1µÄĞ£×¼³ÌĞò,ÉèÖÃ×´Ì¬ÔòµÈ´ı
-
-
-//}
-
-
-//void DMA_Configuration(void)
-//{
-
-//DMA_InitTypeDef DMA_InitStructure;
-//DMA_DeInit(DMA1_Channel1); //½«DMAµÄÍ¨µÀ1¼Ä´æÆ÷ÖØÉèÎªÈ±Ê¡Öµ
-//DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)&ADC1->DR; //DMAÍâÉèADC»ùµØÖ·
-//DMA_InitStructure.DMA_MemoryBaseAddr = (u32)&AD_Value; //DMAÄÚ´æ»ùµØÖ·
-//DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC; //ÄÚ´æ×÷ÎªÊı¾İ´«ÊäµÄÄ¿µÄµØ
-//DMA_InitStructure.DMA_BufferSize = N*M; //DMAÍ¨µÀµÄDMA»º´æµÄ´óĞ¡
-//DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; //ÍâÉèµØÖ·¼Ä´æÆ÷²»±ä
-//DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable; //ÄÚ´æµØÖ·¼Ä´æÆ÷µİÔö
-//DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord; //Êı¾İ¿í¶ÈÎª16Î»
-//DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord; //Êı¾İ¿í¶ÈÎª16Î»
-//DMA_InitStructure.DMA_Mode = DMA_Mode_Circular; //¹¤×÷ÔÚÑ­»·»º´æÄ£Ê½
-//DMA_InitStructure.DMA_Priority = DMA_Priority_High; //DMAÍ¨µÀ xÓµÓĞ¸ßÓÅÏÈ¼¶
-//DMA_InitStructure.DMA_M2M = DMA_M2M_Disable; //DMAÍ¨µÀxÃ»ÓĞÉèÖÃÎªÄÚ´æµ½ÄÚ´æ´«Êä
-//DMA_Init(DMA1_Channel1, &DMA_InitStructure); //¸ù¾İDMA_InitStructÖĞÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯DMAµÄÍ¨µÀ
-
-//}
-
-
-
-////ÅäÖÃËùÓĞÍâÉè
-//void Init_All_Periph(void)
-//{
-
-//RCC_Configuration();
-
-//GPIO_Configuration();
-
-//ADC1_Configuration();
-
-//DMA_Configuration();
-
-////USART1_Configuration();
-////USART_Configuration(9600);
-//	uart_init(115200);	 	//´®¿Ú³õÊ¼»¯Îª115200
-
-
-//}
-
-
-
-//u16 GetVolt(u16 advalue)
-
-//{
-
-//return (u16)(advalue * 330 / 4096); //ÇóµÄ½á¹ûÀ©´óÁË100±¶£¬·½±ãÏÂÃæÇó³öĞ¡Êı
-
-//}
-
-
-
-
-//void filter(void)
-//{
-//int sum = 0;
-//u8 count;
-//for(i=0;i<12;i++)  //¶ÔÃ¿Ò»¸öÍ¨µÀ¶øÑÔM
-
-//{
-
-//for ( count=0;count<N;count++)   //N²ÉÑù¶àÉÙ´Î£¬MÍ¨µÀÊı
-
-//{
-
-//sum += AD_Value[count][i];
-
-//}
-
-//After_filter[i]=sum/N;
-
-//sum=0;
-//}
-
-//}
-
-
-
-
-//int main(void)
-//{
-
-//u16 value[M];  //M¸öÍ¨µÀ
-
-//delay_init();	    	 //ÑÓÊ±º¯Êı³õÊ¼»¯	  
-////NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//ÉèÖÃÖĞ¶ÏÓÅÏÈ¼¶·Ö×éÎª×é2£º2Î»ÇÀÕ¼ÓÅÏÈ¼¶£¬2Î»ÏìÓ¦ÓÅÏÈ¼¶
-////init_All_Periph();
-////SysTick_Initaize();
-
-
-//ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-//DMA_Cmd(DMA1_Channel1, ENABLE); //Æô¶¯DMAÍ¨µÀ
-//while(1)
-//{
-//while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);//µÈ´ı´«ÊäÍê³É·ñÔòµÚÒ»Î»Êı¾İÈİÒ×¶ªÊ§
-
-//filter();
-//for(i=0;i<12;i++)
-//{
-//value[i]= GetVolt(After_filter[i]);
-
-//printf("value[%d]:\t%d.%dv\n",i,value[i]/100,value[i]) ;
-//delay_ms(100);
-//}
-//}
-
-//}
-// 
